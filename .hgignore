@@ -1,0 +1,9 @@
+syntax:glob
+
+.idea/workspace.xml
+*.min.js
+*.min.js.?
+Makefile
+*/Makefile
+.*.sw?
+dist
