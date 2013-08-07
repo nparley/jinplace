@@ -42,13 +42,14 @@
 ;
 //noinspection JSUnusedLocalSymbols
 (function ($, window, document, undefined) {
+	'use strict';
 	var pluginName = "jinplace";
 
 	/**
 	 * @typedef {object} Options
 	 * @class Options
 	 * @property {!string} type - The type of field. Defaults to 'input'
-	 * @property {string} url - The url to submit to. Defaults to same page
+	 * @property {string|function} url - The url to submit to. Defaults to same page
 	 * @property {string} data - Text or JSON data as initial editing text
 	 * @property {string} loadurl - The URL to load content for editing
 	 * @property {string} elementId - The ID of the element
@@ -74,7 +75,8 @@
 		'inputClass',
 		'activator',
 		'textOnly',
-		'placeholder'
+		'placeholder',
+		'submitFunction'
 	];
 
 	// Pairs of settings new,old.  We look for the old name and set the new.
@@ -312,21 +314,13 @@
 		 */
 		submit: function (editor, opts) {
 			var self = this;
-			$.ajax(opts.url, {
-				type: "post",
-				data: requestParams(opts, editor.value()),
-				dataType: 'text',
-				context: self,
 
-				// iOS 6 has a dreadful bug where POST requests are not sent to the
-				// server if they are in the cache.
-				headers: {'Cache-Control': 'no-cache'} // Apple!
-			})
+			$.when(opts.submitFunction.call(undefined, editor.value(), opts))
 					.done(function(data) {
-						this.onUpdate(editor, opts, data);
+						self.onUpdate(editor, opts, data);
 					})
 					.fail(function() {
-						this.cancel(editor);
+						self.cancel(editor);
 					});
 		},
 
@@ -390,6 +384,30 @@
 		return params;
 	};
 
+	/**
+	 * Get the parameters that will be sent in the ajax call to the server.
+	 * Called for both the url and loadurl cases.
+	 *
+	 * @param {Options} opts The options from the element and config settings.
+	 * @param {*} value The value of the control as returned by editor.value().
+	 * @returns {object}
+	 */
+	var requestParams = function (opts, value) {
+		var params = {
+			"id": opts.elementId,
+			"object": opts.object,
+			attribute: opts.attribute
+		};
+
+		if ($.isPlainObject(value)) {
+			$.extend(params, value);
+		} else if (value !== undefined) {
+			params.value = value;
+		}
+
+		return params;
+	};
+
 	// A really lightweight plugin wrapper around the constructor,
 	// preventing against multiple instantiations
 	$.fn[pluginName] = function (options) {
@@ -407,7 +425,30 @@
 		url: document.location.pathname,
 		type: "input",
 		textOnly: 2,
-		placeholder: '[ --- ]'
+		placeholder: '[ --- ]',
+
+		/**
+         * @name Options.submitFunction
+		 *
+		 * The function to call when an editor form is submitted. This can be supplied as an
+		 * option to completely change the default action.
+		 *
+		 * @param {string} value The value that was submitted.
+		 * @param {Options} opts The options for this element.
+		 * @returns {string|object} Returns a string which will be used to populate the element text or
+		 * a promise that will resolve to a string.
+		 */
+		submitFunction: function(value, opts) {
+			return $.ajax(opts.url, {
+					type: "post",
+					data: requestParams(opts, value),
+					dataType: 'text',
+
+					// iOS 6 has a dreadful bug where POST requests are not sent to the
+					// server if they are in the cache.
+					headers: {'Cache-Control': 'no-cache'} // Apple!
+				});
+		}
 	};
 
 	/**

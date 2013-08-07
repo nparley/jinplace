@@ -1,8 +1,9 @@
 /** @name module */
 /** @name test */
+/** @name {object} ajax_data */
 (function() {
 	var qfix = $('#quint-fixture');
-	var span ;
+	var span;
 
 	function go(el) {
 		el = el || span;
@@ -23,8 +24,9 @@
 	module('send', {
 		setup: function() {
 			ajax_data = {};  // defined in index.html
-			qfix.append(span);
+
 			span = $('<span data-ok-button="OK">Hi</span>');
+			qfix.append(span);
 		}
 	});
 
@@ -72,7 +74,7 @@
 		equal(ajax_data.value, 'vv');
 	});
 
-	test('when value returns object, values are sent', function() {
+	test('when value returns object, values are sent', 5, function() {
 		// Create a custom input editor that returns an object.
 		$.fn.jinplace.editors.test_value_editor = {
 			value: function() {
@@ -96,4 +98,99 @@
 		// and value is not set
 		equal(ajax_data.value, undefined);
 	});
+
+	test('submit to function returning string', 4, function() {
+		var rval = {};
+
+		var cancelVal = 'test for function';
+		span.attr('data-cancel-button', cancelVal);
+
+		span.jinplace({
+			submitFunction: function(value, opts) {
+				rval.value = value;
+				rval.opts = opts;
+				rval.thisVal = this;
+
+				return value;
+			}
+		});
+
+		span.click();
+		var value = 'submitted value';
+		submit(value);
+
+		equal(value, rval.value);
+		equal(cancelVal, rval.opts.cancelButton);
+		equal(span.text(), value);
+		equal(window, rval.thisVal);
+	});
+
+	test('submit to function returning promise', 3, function() {
+		var rval = {};
+
+		var cancelVal = 'test for function';
+		span.attr('data-cancel-button', cancelVal);
+
+		span.jinplace({
+			submitFunction: function(value, opts) {
+				rval.value = value;
+				rval.opts = opts;
+
+				return $.Deferred()
+						.resolve('X' + value + 'X')
+						.promise();
+			}
+		});
+
+		span.click();
+		var value = 'submitted value';
+		submit(value);
+
+		equal(value, rval.value);
+		equal(cancelVal, rval.opts.cancelButton);
+		equal(span.text(), 'X'+value+'X');
+	});
+
+	test('submit to function returning undefined', 4, function() {
+		var rval = {};
+
+		var cancelVal = 'test for function';
+		span.attr('data-cancel-button', cancelVal);
+
+		span.jinplace({
+			submitFunction: function(value, opts) {
+				rval.value = value;
+				rval.opts = opts;
+				rval.thisVal = this;
+			}
+		});
+
+		span.click();
+		var value = 'submitted value';
+		submit(value);
+
+		equal(value, rval.value);
+		equal(cancelVal, rval.opts.cancelButton);
+		equal(span.text(), "[ --- ]");
+		equal(window, rval.thisVal);
+	});
+
+	test('submit to function in strict mode', 2, function() {
+		var rval = {};
+
+		span.jinplace({
+			submitFunction: function(value, opts) {
+				'use strict';
+				rval.value = value;
+				rval.opts = opts;
+				rval.thisVal = this;
+			}
+		});
+
+		span.click();
+		submit('xyz');
+
+		equal('xyz', rval.value);
+		equal(undefined, rval.thisVal);
+	})
 })();
