@@ -91,7 +91,7 @@ td {
   border: #888 solid 1px;
   z-index: 2;
 }
-#result-table-placeholder { display: none; height: 100px;}
+#result-table-placeholder { display: none; height: 104px;}
 .demo {
   overflow: hidden;
   border-top: 1px solid #ccc;
@@ -270,7 +270,7 @@ type to <em>textarea</em>.
 
   &lt;div class="editable"
     data-type="textarea" data-url="/internal/person/favourites">
-    Wild geese that fly with the moon on their wings
+    Chocolate and Chips
   &lt;/div>
 
 </pre>
@@ -350,7 +350,7 @@ You can also add a cancel button, again with the text that you specify.
        data-type="textarea"
        data-ok-button="OK"
        data-cancel-button="Cancel">
-    Wild geese that fly with the moon on their wings
+    Chocolate and Chips
   &lt;/div>
 
 </pre>
@@ -511,7 +511,7 @@ $(function() {
     person: {
       firstname: ko.observable('John'),
       lastname: ko.observable('Smith'),
-      favourites: ko.observable('Wild geese that fly with the moon on their wings'),
+      favourites: ko.observable('Chocolate and Chips'),
       direction: ko.observable('E')
     },
 
@@ -583,16 +583,15 @@ $(function() {
     const rt = $('#result-table');
     const rtp = $('#result-table-placeholder');
     var tableTop = rt.offset().top;
+
+    // Keep the current state, to avoid pointless changes on every scroll or resize.  This was a
+    // bit of a problem on mobile devices.
     var inline;
     var floating;
 
     function recalc() {
-      var ninline = false;   // Table is below the introduction text, rather than over on the right.
-      var nfloating = false; // Table is inline and floating at the top of the page.
-      if ($(window).width() < 1270)
-        ninline = true;
-      if ($(window).scrollTop() > tableTop)
-        nfloating = true;
+      var ninline = ($(window).width() < 1270);           // Table is below the introduction text, rather than over on the right.
+      var nfloating = ($(window).scrollTop() > tableTop); // Table is inline and floating at the top of the page.
 
       if (ninline !== inline || nfloating !== floating) {
         inline = ninline;
