@@ -1,0 +1,111 @@
+
+= Events =
+'''New in v1.1'''
+
+Events are sent from the edited element to indicate the success or
+otherwise of the operation.
+You can bind an event handler to be notified when one of these events
+occurs.
+
+== General example ==
+Here is a quick example of how to bind the event that is sent after a
+successful edit.
+This is just standard use of the jquery .on() method, so see the
+jquery documentation for more information.
+
+<pre code=javascript>
+// Bind to the 'jinplace:done' event on all editable elements and
+// print a message.  Of course you can bind to individual elements
+// as you require.
+$('.editable').jinplace()
+	.on('jinplace:done', function(ev, data) {
+		console.log('Successful edit! New value is', data);
+	});
+</pre>
+
+== Available events ==
+Full details of all the available events.
+These events are always fired, even if you define your own
+submitFunction. Either 'jinplace:done' or 'jinplace:fail' will be
+fired, followed by 'jinplace:always'.
+
+=== Event jinplace:done ===
+This event is fired after a submit is successfully completed.
+It occurs after the submit operation and before the edit field is
+taken down and the original text returned.
+<pre code=javascript>
+element.on('jinplace:done',
+	// ev: The event object itself
+	// data: The new text for the element
+	// textStatus: Text from the http reply.
+	// jqxhr: the jquery version of the XmlHttpRequest object
+	function(ev, data, [textStatus, [jqxhr]]) {
+	}
+);
+</pre>
+Your handler function is always passed the following arguments.
+
+; ev
+:   The event object
+; data
+:   The data returned by the submit which will be used to populate
+the text control.
+
+By default, unless you supply a ''submitFunction'', there will be two
+further arguments from the ajax call.
+; textStatus
+:   A text representation of the http status, normally blank
+; jqxhr
+:   The jquery enhanced XmlHttpRequest object.
+
+If a custom 'submitFunction' is defined then the arguments (if any)
+are entirely determined by that function.
+
+=== Event jinplace:fail ===
+This event is fired after a submit fails.
+It occurs after the submit operation and before the edit field
+is taken down.
+
+There will never be both a jinplace:done and a jinplace:fail for the
+same submit operation.
+<pre code=javascript>
+element.on('jinplace:fail',
+	// ev: The event object itself
+	// jqxhr: the jquery version of the XmlHttpRequest object
+	// textStatus: Text status: "error", "timeout" etc
+	// errorThrown: The text in the error reply
+	function(ev, jqxhr, textStatus, errorThrown) {
+	}
+</pre>
+If you have not overridden the 'submitFunction' then the handler will
+be passed the following arguments from the ajax call.
+
+; ev
+:   The event object, this is always passed.
+; jqxhr
+:   The jquery enhanced XmlHttpRequest object.
+; textStatus
+:   This will be 'error', 'timeout', 'parsererror', 'abort' etc to
+describe the kind of error.
+; errorThrown
+:   This is the text part of the http reply such as 'Not Found'
+'Internal Server Error' etc.  Together you may be able to use this to
+work out what has gone wrong and the likelihood of the user being able
+to correct the problem.  Mostly just knowing that the operation failed
+is all you will need.
+
+If a custom 'submitFunction' is defined then that function
+determines what arguments your handler is called with.
+
+=== Event jinplace:always ===
+This event is fired after the editing operation, no matter if it
+succeeds or fails.
+The callback functions are called after any success or fail callback
+functions have been run.
+
+The arguments that the handler function receives are the same
+ones that the appropriate success or fail handler receives.
+
+If a custom 'submitFunction' is defined then this event will still
+always be called, but the arguments that the callback functions are
+supplied with will depend on the submitFunction.
