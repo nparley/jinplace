@@ -363,7 +363,7 @@
 		 */
 		setContent: function(data) {
 			var element = this.element;
-			data = data[opts.object];
+			data = data[this.opts.object];
 			if (!data) {
 				element.html(this.opts.placeholder);
 				return;
