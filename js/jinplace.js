@@ -503,7 +503,7 @@
 			if (opts.okButtonClass) {
 				$button.addClass(opts.okButtonClass);
 			} else {
-				$button.addClass('jip-button jip-ok-button');
+				$button.addClass('btn btn-xs btn-block btn-alert-outline');
 			}
 			setHandler($button, 'submit');
 		}
@@ -514,7 +514,7 @@
 			if (opts.cancelButtonClass) {
 				$button.addClass(opts.cancelButtonClass);
 			} else {
-				$button.addClass('jip-button jip-cancel-button');
+				$button.addClass('btn btn-xs btn-block btn-danger-outline');
 			}
 			setHandler($button, 'jip:cancel');
 		}
