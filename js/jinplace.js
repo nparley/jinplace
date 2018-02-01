@@ -326,8 +326,8 @@
 			$.when(rval)
 					.done(function(data, textStatus, jqxhr) {
 						// If you have your own submitFunction, the arguments may have different meanings.
-						self.element.trigger('jinplace:done', [data, textStatus, jqxhr]);
 						self.onUpdate(editor, opts, data);
+						self.element.trigger('jinplace:done', [data, textStatus, jqxhr]);
 					})
 					.fail(function(jqxhr, textStatus, errorThrown) {
 						// If you have your own submitFunction, the arguments may have different meanings.
